@@ -43,9 +43,9 @@ TestResults/
 # Local environment
 .env
 .env.local
-appsettings.local.json
-appsettings.Development.json
-appsettings.Production.json
+# appsettings.local.json
+# appsettings.Development.json
+# appsettings.Production.json
 
 # Rider
 .idea/
