@@ -1,0 +1,78 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options
+.vs/
+.vscode/
+
+# IDE files
+*.sln.iml
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+
+# NuGet
+*.nupkg
+*.nuget.props
+*.nuget.targets
+
+# ReSharper
+.idea/
+*.DotSettings
+*.DotSettings.user
+
+# Local environment
+.env
+.env.local
+appsettings.local.json
+appsettings.Development.json
+appsettings.Production.json
+
+# Rider
+.idea/
+
+# Mac
+.DS_Store
+
+# Node (if needed)
+node_modules/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker volumes
+postgres_data/
+redis_data/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+*~

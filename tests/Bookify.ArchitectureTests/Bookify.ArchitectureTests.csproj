@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.6.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="NetArchTest.Rules" Version="1.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Bookify.Domain\Bookify.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Bookify.Application\Bookify.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Bookify.Infrastructure\Bookify.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Bookify.API\Bookify.API.csproj" />
+  </ItemGroup>
+
+</Project>
