@@ -43,7 +43,7 @@ internal class PricingService
         var basePrice = apartment.PricePerNight.Multiply(numberOfNights);
 
         // Step 2: Calculate amenity surcharge based on apartment amenities
-        var amenitySurcharge = CalculateAmenitySurcharge(apartment.Amenities, basePrice, currency);
+        var amenitySurcharge = CalculateAmenitySurcharge(apartment.Amenities, basePrice);
 
         // Step 3: Add fixed cleaning fee
         var cleaningFee = new Money(CleaningFeeAmount, currency);
@@ -63,9 +63,8 @@ internal class PricingService
     /// </summary>
     /// <param name="amenities">The apartment's amenities flags.</param>
     /// <param name="basePrice">The base price to calculate surcharge from.</param>
-    /// <param name="currency">The currency for the result.</param>
     /// <returns>The total amenity surcharge amount.</returns>
-    private static Money CalculateAmenitySurcharge(AmenityType amenities, Money basePrice, string currency)
+    private static Money CalculateAmenitySurcharge(AmenityType amenities, Money basePrice)
     {
         decimal totalSurchargePercentage = 0m;
 

@@ -45,6 +45,36 @@ public class User : DataEntity
     private readonly List<AccessControl.UserRole> _userRoles = new();
 
     /// <summary>
+    /// Gets apartments owned by this user.
+    /// </summary>
+    public IReadOnlyCollection<Apartment> OwnedApartments
+    {
+        get => _ownedApartments.AsReadOnly();
+    }
+
+    private readonly List<Apartment> _ownedApartments = new();
+
+    /// <summary>
+    /// Gets bookings made by this user.
+    /// </summary>
+    public IReadOnlyCollection<Booking> Bookings
+    {
+        get => _bookings.AsReadOnly();
+    }
+
+    private readonly List<Booking> _bookings = new();
+
+    /// <summary>
+    /// Gets reviews written by this user.
+    /// </summary>
+    public IReadOnlyCollection<Review> Reviews
+    {
+        get => _reviews.AsReadOnly();
+    }
+
+    private readonly List<Review> _reviews = new();
+
+    /// <summary>
     /// Gets a value indicating whether this user account is active.
     /// </summary>
     public bool IsActive { get; private set; } = true;
@@ -98,5 +128,65 @@ public class User : DataEntity
             .Select(ur => ur.Role)
             .ToList()
             .AsReadOnly();
+    }
+
+    /// <summary>
+    /// Factory method to create a new user with validation.
+    /// </summary>
+    /// <param name="email">The user's email address (must be unique).</param>
+    /// <param name="passwordHash">The user's password hash (bcrypt or similar).</param>
+    /// <param name="firstName">The user's first name.</param>
+    /// <param name="lastName">The user's last name.</param>
+    /// <param name="phoneNumber">Optional phone number.</param>
+    /// <returns>A Result containing the new user or an error message.</returns>
+    public static Shared.Results.Result<User> CreateUser(
+        string email,
+        string passwordHash,
+        string firstName,
+        string lastName,
+        string? phoneNumber = null)
+    {
+        // Validate email
+        if (string.IsNullOrWhiteSpace(email))
+            return Shared.Results.Result<User>.Failure("Email is required");
+
+        if (email.Length > 256)
+            return Shared.Results.Result<User>.Failure("Email cannot exceed 256 characters");
+
+        // Validate password hash
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            return Shared.Results.Result<User>.Failure("Password hash is required");
+
+        // Validate names
+        if (string.IsNullOrWhiteSpace(firstName))
+            return Shared.Results.Result<User>.Failure("First name is required");
+
+        if (firstName.Length > 100)
+            return Shared.Results.Result<User>.Failure("First name cannot exceed 100 characters");
+
+        if (string.IsNullOrWhiteSpace(lastName))
+            return Shared.Results.Result<User>.Failure("Last name is required");
+
+        if (lastName.Length > 100)
+            return Shared.Results.Result<User>.Failure("Last name cannot exceed 100 characters");
+
+        // Validate phone number if provided
+        if (!string.IsNullOrWhiteSpace(phoneNumber) && phoneNumber.Length > 20)
+            return Shared.Results.Result<User>.Failure("Phone number cannot exceed 20 characters");
+
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = email,
+            PasswordHash = passwordHash,
+            FirstName = firstName,
+            LastName = lastName,
+            PhoneNumber = phoneNumber,
+            IsActive = true,
+            CreatedOnUtc = DateTime.UtcNow,
+            ModifiedOnUtc = DateTime.UtcNow
+        };
+
+        return Shared.Results.Result<User>.Success(user);
     }
 }

@@ -30,6 +30,26 @@ public class Role : DataEntity
     private readonly List<Permission> _permissions = new();
 
     /// <summary>
+    /// Gets the role-permission mappings for this role.
+    /// </summary>
+    public IReadOnlyCollection<RolePermission> RolePermissions
+    {
+        get => _rolePermissions.AsReadOnly();
+    }
+
+    private readonly List<RolePermission> _rolePermissions = new();
+
+    /// <summary>
+    /// Gets the user-role mappings for users assigned this role.
+    /// </summary>
+    public IReadOnlyCollection<UserRole> UserRoles
+    {
+        get => _userRoles.AsReadOnly();
+    }
+
+    private readonly List<UserRole> _userRoles = new();
+
+    /// <summary>
     /// Gets a value indicating whether this role is active and can be assigned to users.
     /// </summary>
     public bool IsActive { get; private set; } = true;
@@ -107,7 +127,7 @@ public class Role : DataEntity
     {
         var result = Create(name, description);
         if (!result.IsSuccess)
-            return result;
+            return Result.Failure(result.Error);
 
         Name = result.Value.Name;
         Description = result.Value.Description;

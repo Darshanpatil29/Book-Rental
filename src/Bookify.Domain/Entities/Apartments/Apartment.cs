@@ -15,6 +15,11 @@ public class Apartment : DataEntity
     public Guid OwnerId { get; private set; }
 
     /// <summary>
+    /// Gets the owner of this apartment (navigation property).
+    /// </summary>
+    public User Owner { get; private set; } = null!;
+
+    /// <summary>
     /// Gets the apartment's title/name.
     /// </summary>
     public string Title { get; private set; } = string.Empty;
@@ -49,4 +54,23 @@ public class Apartment : DataEntity
     /// </summary>
     public bool IsActive { get; private set; } = true;
 
+    /// <summary>
+    /// Gets all bookings for this apartment.
+    /// </summary>
+    public IReadOnlyCollection<Booking> Bookings
+    {
+        get => _bookings.AsReadOnly();
+    }
+
+    private readonly List<Booking> _bookings = new();
+
+    /// <summary>
+    /// Gets all reviews for this apartment.
+    /// </summary>
+    public IReadOnlyCollection<Review> Reviews
+    {
+        get => _reviews.AsReadOnly();
+    }
+
+    private readonly List<Review> _reviews = new();
 }

@@ -27,9 +27,19 @@ public class Review : DataEntity
     public Guid UserId { get; private set; }
 
     /// <summary>
+    /// Gets the guest who wrote the review (navigation property).
+    /// </summary>
+    public User User { get; private set; } = null!;
+
+    /// <summary>
     /// Gets the ID of the apartment being reviewed.
     /// </summary>
     public Guid ApartmentId { get; private set; }
+
+    /// <summary>
+    /// Gets the apartment being reviewed (navigation property).
+    /// </summary>
+    public Apartment Apartment { get; private set; } = null!;
 
     /// <summary>
     /// Gets the rating given by the guest (1-5).
@@ -45,4 +55,9 @@ public class Review : DataEntity
     /// Gets a value indicating whether this review has been moderated/approved.
     /// </summary>
     public bool IsApproved { get; private set; }
+
+    /// <summary>
+    /// Gets the booking this review is associated with (navigation property).
+    /// </summary>
+    public Booking Booking { get; private set; } = null!;
 }

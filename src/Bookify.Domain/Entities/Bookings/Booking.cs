@@ -19,9 +19,19 @@ public class Booking : DataEntity
     public Guid ApartmentId { get; private set; }
 
     /// <summary>
+    /// Gets the apartment being booked (navigation property).
+    /// </summary>
+    public Apartment Apartment { get; private set; } = null!;
+
+    /// <summary>
     /// Gets the ID of the guest making the booking.
     /// </summary>
     public Guid UserId { get; private set; }
+
+    /// <summary>
+    /// Gets the guest making the booking (navigation property).
+    /// </summary>
+    public User User { get; private set; } = null!;
 
     /// <summary>
     /// Gets the check-in and check-out dates.

@@ -47,6 +47,16 @@ public class Permission : DataEntity
     public int SortOrder { get; private set; }
 
     /// <summary>
+    /// Gets the role-permission mappings for this permission.
+    /// </summary>
+    public IReadOnlyCollection<RolePermission> RolePermissions
+    {
+        get => _rolePermissions.AsReadOnly();
+    }
+
+    private readonly List<RolePermission> _rolePermissions = new();
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Permission"/> class.
     /// </summary>
     private Permission() { }
