@@ -34,4 +34,17 @@ public class DataEntity
     /// Gets the user ID who last modified this entity. Null if never modified.
     /// </summary>
     public Guid? ModifiedBy { get; protected set; }
+
+    private readonly List<IDomainEvent> _domainEvents = new();
+    public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents;
+
+    public void RaiseDomainEvent(IDomainEvent domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
+
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+    }
 }

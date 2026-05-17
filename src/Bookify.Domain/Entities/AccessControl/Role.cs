@@ -26,7 +26,7 @@ public class Role : DataEntity
     {
         get => _permissions.AsReadOnly();
     }
-    
+
     private readonly List<Permission> _permissions = new();
 
     /// <summary>
