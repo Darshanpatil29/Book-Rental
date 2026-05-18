@@ -1,10 +1,14 @@
 using Serilog;
+using Bookify.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Logging
 builder.Host.UseSerilog((context, config) =>
-    config.WriteTo.Console()
+    config
+        .MinimumLevel.Information()
+        .WriteTo.Console()
+        .Enrich.FromLogContext()
 );
 
 // Services
@@ -21,6 +25,11 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddHealthChecks();
+
+// Infrastructure services (Database, Caching, etc.)
+builder.Services.AddInfrastructure(
+    builder.Configuration,
+    builder.Environment.EnvironmentName);
 
 var app = builder.Build();
 

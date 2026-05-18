@@ -1,11 +1,40 @@
-// Infrastructure layer - implements technical details
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Bookify.Infrastructure.Extensions;
+
 namespace Bookify.Infrastructure;
 
 /// <summary>
-/// Placeholder for infrastructure layer setup.
-/// Will contain persistence, authentication, caching, and external service integrations.
+/// Configuration for the Infrastructure layer.
+/// Registers all infrastructure services including database, caching, and external integrations.
 /// </summary>
-public class InfrastructureConfiguration
+public static class InfrastructureConfiguration
 {
-    // Configuration will be added here
+    /// <summary>
+    /// Adds infrastructure services to the dependency injection container.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <param name="environment">The environment name.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        string? environment = null)
+    {
+        // Register database context and related services
+        services.AddBookifyDbContext(configuration, environment);
+
+        // TODO: Add other infrastructure services here:
+        // - Repository implementations
+        // - Caching services (Redis)
+        // - Authentication services (Keycloak)
+        // - Background job services (Quartz)
+        // - Logging services (Serilog)
+        // - Email service
+        // - Payment service integration
+
+        return services;
+    }
 }
+
