@@ -1,5 +1,6 @@
 using Serilog;
 using Bookify.Infrastructure;
+using Bookify.Infrastructure.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +27,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddHealthChecks();
 
-// Infrastructure services (Database, Caching, etc.)
+// Infrastructure services (Database, JWT Authentication, Authorization, Caching, etc.)
 builder.Services.AddInfrastructure(
     builder.Configuration,
     builder.Environment.EnvironmentName);
@@ -41,6 +42,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Add authentication and authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 app.MapHealthChecks("/health");
 

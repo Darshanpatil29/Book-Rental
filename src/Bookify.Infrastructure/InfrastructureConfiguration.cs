@@ -25,12 +25,23 @@ public static class InfrastructureConfiguration
         // Register database context and related services
         services.AddBookifyDbContext(configuration, environment);
 
+        // Register JWT authentication services (token generation, validation, blacklisting)
+        services.AddJwtAuthentication();
+
+        // Register JWT Bearer authentication scheme and token validation
+        services.AddJwtBearerScheme(configuration);
+
+        // Register authorization policies (RBAC, PBAC)
+        services.AddAuthorizationPolicies();
+
+        // Register authorization services (RbacService for permission/role checking)
+        services.AddAuthorizationServices();
+
         // TODO: Add other infrastructure services here:
         // - Repository implementations
         // - Caching services (Redis)
-        // - Authentication services (Keycloak)
+        // - Google OAuth services
         // - Background job services (Quartz)
-        // - Logging services (Serilog)
         // - Email service
         // - Payment service integration
 
