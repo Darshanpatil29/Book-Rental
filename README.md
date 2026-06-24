@@ -6,7 +6,7 @@ An enterprise-grade .NET 10 apartment rental booking system built with **Clean A
 
 ### Prerequisites
 - **.NET 10 SDK** (verify: `dotnet --version`)
-- **Docker Desktop** (PostgreSQL 15, Redis 7, Keycloak 23)
+- **Docker Desktop** (PostgreSQL 15, Redis 7)
 - **Git**
 
 ### Installation & Setup
@@ -40,7 +40,7 @@ dotnet watch run --project src/Bookify.API/Bookify.API.csproj
 ## 📋 Implementation Plan Summary
 
 ### **Project Overview**
-Bookify is a production-ready, multi-tenant apartment rental booking platform demonstrating enterprise-level .NET development. It implements CQRS for optimized operations, rich domain modeling with value objects, and comprehensive security using Keycloak OAuth 2.0.
+Bookify is a production-ready, multi-tenant apartment rental booking platform demonstrating enterprise-level .NET development. It implements CQRS for optimized operations, rich domain modeling with value objects, and comprehensive security using Google OAuth 2.0 and JWT.
 
 ### **Phase Breakdown (12 Weeks)**
 
@@ -59,7 +59,7 @@ Bookify is a production-ready, multi-tenant apartment rental booking platform de
 
 ### **1. User Management (REQ-001 to REQ-003)**
 - ✅ User registration with email validation
-- ✅ JWT-based authentication via Keycloak
+- ✅ JWT-based authentication via Google OAuth 2.0
 - ✅ Role-Based Access Control (RBAC): Admin, Owner, Guest
 
 ### **2. Apartment Management (REQ-004 to REQ-006)**
@@ -95,7 +95,7 @@ Application Layer (CQRS Handlers, Validators, DTOs)
     ↓
 Domain Layer (Entities, Value Objects, Domain Events)
     ↓
-Infrastructure Layer (EF Core, Dapper, Redis, Keycloak)
+Infrastructure Layer (EF Core, Dapper, Redis, Google OAuth 2.0)
 ```
 
 ### **Technology Stack**
@@ -105,7 +105,7 @@ Infrastructure Layer (EF Core, Dapper, Redis, Keycloak)
 | **.NET** | 10.0 | Runtime |
 | **PostgreSQL** | 15 | Primary database |
 | **Redis** | 7.0 | Caching layer |
-| **Keycloak** | 23 | Authentication (OAuth 2.0/OpenID Connect) |
+| **Google OAuth 2.0** | Managed | Authentication (OAuth 2.0/OpenID Connect) |
 | **MediatR** | 11.1.0 | CQRS command/query bus |
 | **Entity Framework Core** | 8.0.0 | ORM for writes |
 | **Dapper** | 2.1.0 | Optimized queries for reads |
@@ -158,7 +158,7 @@ Bookify.sln
 │   ├── Bookify.API/                 # Controllers, middleware, entry point
 │   ├── Bookify.Application/         # CQRS handlers, validators, DTOs
 │   ├── Bookify.Domain/              # Entities, value objects, domain events
-│   ├── Bookify.Infrastructure/      # EF Core, Dapper, Redis, Keycloak
+│   ├── Bookify.Infrastructure/      # EF Core, Dapper, Redis, Google OAuth 2.0
 │   └── Bookify.Shared/              # Constants, enums, exceptions
 ├── tests/
 │   ├── Bookify.UnitTests/           # Domain & application logic tests
@@ -243,7 +243,7 @@ GET   /api/v1/apartments/{id}/reviews     # Get apartment reviews
 - Target: > 80% coverage
 
 ### **Integration Tests** (`Bookify.IntegrationTests/`)
-- Database operations, Keycloak auth, Redis caching
+- Database operations, Google OAuth auth, Redis caching
 - Uses Testcontainers for realistic scenarios
 
 ### **Architecture Tests** (`Bookify.ArchitectureTests/`)
@@ -281,7 +281,7 @@ Before modifying:
 ### **Docker Services**
 - **PostgreSQL 15** (port 5432): `bookify-postgres`
 - **Redis 7** (port 6379): `bookify-redis`
-- **Keycloak 23** (port 8080): `bookify-keycloak`
+- **Google OAuth 2.0**: external identity provider configured via environment variables
 
 ### **Configuration**
 - Development: `appsettings.Development.json`
@@ -316,7 +316,7 @@ docker ps
 # View logs
 docker-compose logs -f postgres
 docker-compose logs -f redis
-docker-compose logs -f keycloak
+docker-compose logs -f postgres
 ```
 
 ### **Build Failures**

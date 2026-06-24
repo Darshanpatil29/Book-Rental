@@ -6,7 +6,7 @@
 
 **ALWAYS run these in order after cloning:**
 ```bash
-# 1. Start Docker infrastructure (PostgreSQL 15, Redis 7, Keycloak 23)
+# 1. Start Docker infrastructure (PostgreSQL 15, Redis 7)
 docker-compose up -d
 
 # 2. Restore and build solution
@@ -25,12 +25,12 @@ dotnet watch run --project src/Bookify.API/Bookify.API.csproj
 ## Critical Prerequisites
 
 - **.NET 10 SDK** (verify: `dotnet --version`)
-- **Docker Desktop** with Docker Compose (for PostgreSQL 15, Redis 7, Keycloak 23)
+- **Docker Desktop** with Docker Compose (for PostgreSQL 15, Redis 7)
 - Git
 
 **Docker must be running** before building/testing. If you see connection errors, verify:
 ```bash
-docker ps  # Should list bookify-postgres, bookify-redis, bookify-keycloak
+docker ps  # Should list bookify-postgres and bookify-redis
 docker-compose logs  # Check service health
 ```
 
@@ -43,7 +43,7 @@ docker-compose logs  # Check service health
 | **API** | `src/Bookify.API/` | Controllers, middleware, Program.cs entry point |
 | **Application** | `src/Bookify.Application/` | CQRS handlers, commands, queries, DTOs, validators |
 | **Domain** | `src/Bookify.Domain/` | Entities, value objects, domain events, Entity.cs base |
-| **Infrastructure** | `src/Bookify.Infrastructure/` | EF Core, Dapper, Redis, Keycloak, external services |
+| **Infrastructure** | `src/Bookify.Infrastructure/` | EF Core, Dapper, Redis, Google OAuth, external services |
 
 **Tests** (in `tests/`):
 - `Bookify.UnitTests/` – Domain/service logic
@@ -53,7 +53,7 @@ docker-compose logs  # Check service health
 **Config files**:
 - `Directory.Build.props` – Global: net10.0, nullable, code analyzers enabled
 - `.editorconfig` – Code style: 4-space indent, PascalCase, interface prefix 'I'
-- `docker-compose.yml` – Local dev: PostgreSQL (5432), Redis (6379), Keycloak (8080)
+- `docker-compose.yml` – Local dev: PostgreSQL (5432), Redis (6379)
 
 ## Build & Test Validation
 
@@ -124,7 +124,7 @@ GET  /swagger             # API documentation
 
 ### User Management (Phase 1 ✅)
 ```
-POST  /api/v1/users/register    # Register with Keycloak
+POST  /api/v1/users/register    # Register with Google OAuth sign-in
 POST  /api/v1/users/login       # Login returns JWT
 GET   /api/v1/users/me          # Requires auth bearer token
 GET   /api/v2/users/me          # Extended info (v2)
@@ -152,7 +152,7 @@ Test with JWT Bearer token in Authorization header: `Authorization: Bearer {toke
 - Used for apartment search caching (1-hour TTL)
 - Target hit ratio: >80%
 
-**Keycloak 23** (bookify-keycloak:8080):
+**Google OAuth 2.0** (configured via environment variables):
 - Admin: `admin:admin`
 - OpenID Connect provider for JWT tokens
 - Required for user authentication flows
@@ -187,10 +187,10 @@ Test with JWT Bearer token in Authorization header: `Authorization: Bearer {toke
 Before modifying any of the following areas, **ALWAYS ask the user for explicit permission and wait for approval**:
 
 - **Database schema** (entities, migrations, relationships)
-- **Authentication & Authorization** (Keycloak integration, JWT handling, permissions)
+- **Authentication & Authorization** (Google OAuth integration, JWT handling, permissions)
 - **Domain entities & aggregate roots** (business logic, invariants, domain events)
 - **API contracts** (request/response DTOs, endpoint signatures)
-- **Critical dependencies** (MediatR, EF Core, Keycloak client versions)
+- **Critical dependencies** (MediatR, EF Core, Google auth client libraries)
 - **Pricing calculations** (financial logic must be verified)
 - **Outbox pattern / Event processing** (reliability-critical)
 - **Payment-related code** (any transaction, booking confirmation logic)
@@ -218,7 +218,7 @@ Always prefer guidance from `docs/BOOKIFY_IMPLEMENTATION_PLAN.md` before impleme
 **Docker containers must be healthy**:
 - PostgreSQL: `pg_isready` check, waits 10s between retries
 - Redis: `redis-cli ping` check
-- Keycloak: HTTP health endpoint check
+- Google OAuth: verify client configuration and token validation paths
 - Wait 15-30 seconds after `docker-compose up` before building/testing
 
 **Build hints**:
@@ -236,7 +236,7 @@ Always prefer guidance from `docs/BOOKIFY_IMPLEMENTATION_PLAN.md` before impleme
 **Docker containers must be healthy**:
 - PostgreSQL: `pg_isready` check, waits 10s between retries
 - Redis: `redis-cli ping` check
-- Keycloak: HTTP health endpoint check
+- Google OAuth: verify client configuration and token validation paths
 - Wait 15-30 seconds after `docker-compose up` before building/testing
 
 **Port Conflicts**:
@@ -245,7 +245,7 @@ Always prefer guidance from `docs/BOOKIFY_IMPLEMENTATION_PLAN.md` before impleme
 netstat -ano | findstr :5000   # API port
 netstat -ano | findstr :5432   # PostgreSQL
 netstat -ano | findstr :6379   # Redis
-netstat -ano | findstr :8080   # Keycloak
+netstat -ano | findstr :5000   # API port
 ```
 
 **Database Issues**:
@@ -267,7 +267,7 @@ docker-compose up -d
 # View logs
 docker-compose logs -f postgres
 docker-compose logs -f redis
-docker-compose logs -f keycloak
+docker-compose logs -f postgres
 ```
 
 ## Important Reference Files

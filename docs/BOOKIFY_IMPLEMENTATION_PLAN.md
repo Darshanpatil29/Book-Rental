@@ -1,7 +1,7 @@
 # BOOKIFY - Comprehensive Implementation Plan & Requirements
 
 **Project Type:** Apartment Rental Booking System  
-**Technology Stack:** .NET 8, ASP.NET Core, PostgreSQL, Keycloak, Redis  
+**Technology Stack:** .NET 10, ASP.NET Core, PostgreSQL, Google OAuth 2.0, Redis  
 **Architecture:** Clean Architecture with CQRS and Domain-Driven Design  
 **Date:** April 2026  
 
@@ -15,7 +15,7 @@ Bookify is a **production-ready apartment rental booking platform** demonstratin
 - ✅ Rich domain modeling with value objects and domain events
 - ✅ CQRS pattern for optimized read/write operations
 - ✅ Microservices-ready architecture
-- ✅ Enterprise-grade security (Keycloak OAuth/OpenID Connect)
+- ✅ Enterprise-grade security (Google OAuth 2.0 + JWT)
 - ✅ Comprehensive API versioning strategy
 - ✅ Distributed caching and background job processing
 - ✅ Full test coverage with integration testing
@@ -60,16 +60,16 @@ Bookify is a **production-ready apartment rental booking platform** demonstratin
 **REQ-001: User Registration**
 - Users register with email and personal details (first name, last name)
 - System validates email uniqueness
-- User created in Keycloak (external identity provider)
+- User created through Google OAuth sign-in (external identity provider)
 - Confirmation email sent (future: email verification)
 - **Acceptance Criteria:**
   - Duplicate emails rejected with HTTP 400
   - User searchable immediately after creation
-  - Identity linked between Keycloak and database
+  - Identity linked between Google subject ID and database
 
 **REQ-002: User Authentication**
 - JWT-based stateless authentication
-- OAuth 2.0 / OpenID Connect with Keycloak
+- OAuth 2.0 / OpenID Connect with Google
 - Access tokens valid for 15 minutes (configurable)
 - Refresh tokens for session extension
 - **Acceptance Criteria:**
@@ -78,13 +78,18 @@ Bookify is a **production-ready apartment rental booking platform** demonstratin
   - All endpoints (except register/login) require valid JWT
 
 **REQ-003: Authority & Permissions**
+**REQ-003: Authority & Permissions**
 - Role-based access control (RBAC)
-- Permission-level granularity (UsersRead, UsersWrite, etc.)
+- Permission-level granularity (UsersRead, UsersWrite, etc.) — modeled for audit and service-layer checks
 - Roles: Admin, Owner, Guest
 - **Acceptance Criteria:**
   - Non-admin users cannot access admin endpoints
   - Guests cannot modify bookings
   - Owners can only manage their own apartments
+
+Implementation notes:
+- Two-layer authorization pattern: 1) fast, claims-only role checks at the API boundary (controller/pipeline) to fail-fast; 2) authoritative, resource-level access checks in the application/service layer that inspect ownership, role→permission mappings, and business rules (no DB calls in layer 1; DB and richer logic in layer 2).
+- Keep permission entities for audit, UI, and service-layer evaluation; avoid dynamic policy generation at startup. This improves startup simplicity and token-only checks performance.
 
 ### 3.2 Apartment Management
 
@@ -234,7 +239,7 @@ Bookify is a **production-ready apartment rental booking platform** demonstratin
 
 | Requirement | Implementation |
 |-------------|-----------------|
-| **Authentication** | Keycloak OAuth 2.0 + JWT Bearer Tokens |
+| **Authentication** | Google OAuth 2.0 + JWT Bearer Tokens |
 | **Authorization** | RBAC (Role-Based) + Permission-level checks |
 | **Data Encryption** | TLS 1.3 for transport, AES-256 for sensitive fields |
 | **OWASP Compliance** | A01:2021 Injection, A07:2021 CSRF Prevention, etc. |
@@ -259,7 +264,7 @@ Bookify is a **production-ready apartment rental booking platform** demonstratin
 - Database replication (Primary + Standby)
 - Automated backup every 6 hours
 - Health checks on critical endpoints
-- Circuit breakers for external service calls (Keycloak)
+- Circuit breakers for external service calls (Google token validation and profile lookup)
 - Graceful degradation when cache unavailable
 
 ### 4.4 Scalability
@@ -307,7 +312,7 @@ Bookify is a **production-ready apartment rental booking platform** demonstratin
 - ✅ Development environment setup (Visual Studio, Docker)
 - ✅ Git repository initialized with branching strategy
 - ✅ Database schema created (PostgreSQL)
-- ✅ Keycloak realm configured with client credentials
+- ✅ Google OAuth client configured with redirect URI and scopes
 - ✅ Docker Compose stack with all services
 - ✅ CI/CD pipeline basics (GitHub Actions)
 
@@ -323,24 +328,23 @@ Bookify is a **production-ready apartment rental booking platform** demonstratin
    - Create tables: apartments, users, bookings, reviews
    - Setup constraints and indexes
 
-3. Keycloak Setup:
-   - Create realm `bookify`
-   - Configure OAuth clients: `bookify-client`, `bookify-admin`
-   - Setup user roles: Admin, Owner, Guest
+3. Google OAuth Setup:
+  - Create Google Cloud OAuth credentials
+  - Configure OAuth client for `bookify`
+  - Setup redirect URI, scopes, and consent screen
 
 4. Docker Compose:
    ```yaml
    services:
      api: (port 5000)
      postgres: (port 5432)
-     keycloak: (port 8080)
      redis: (port 6379)
    ```
 
 **Success Criteria:**
 - All services start without errors
 - Database migrations apply cleanly
-- Keycloak accessible and clients configured
+- Google OAuth client configured and sign-in flow works end to end
 
 ---
 
@@ -365,7 +369,7 @@ SO THAT I can search and book apartments
 Acceptance Criteria:
 - POST /api/v1/users/register with email, firstName, lastName
 - Email validation and uniqueness check
-- User created in Keycloak
+- User created through Google OAuth sign-in
 - User persisted in database
 - Success response: 201 Created with user ID
 - Error handling: 400 Bad Request for validation failures
@@ -403,10 +407,11 @@ Acceptance Criteria:
 - [ ] Create `RegisterUserCommand` + handler
 - [ ] Create `LoginCommand` + handler
 - [ ] Configure FluentValidation rules
-- [ ] Setup JWT middleware and Keycloak integration
+- [ ] Setup JWT middleware and Google OAuth integration
 - [ ] Implement `IAuthenticationService` interface
 - [ ] Write unit tests for auth logic
 - [ ] Document endpoints in Swagger
+- [ ] Seed access control data (roles, permissions, role-permission mappings) before running Auth flows — use `docs/seed_access_control.sql` or a runtime seeder; ensure roles `Admin/Owner/Guest` exist.
 
 **Definition of Done:**
 - Code reviewed and approved
@@ -484,7 +489,7 @@ Acceptance Criteria:
 
 **Dependencies:**
 - Must complete Phase 1 (authentication, authorization)
-- Keycloak roles (Owner role required)
+- Local role assignment and permission mapping (Owner role required)
 
 ---
 
@@ -642,7 +647,7 @@ Acceptance Criteria:
 
 **Integration Tests** (Testcontainers)
 - Full database transactions
-- Keycloak integration
+- Google OAuth integration
 - Redis caching
 - Real EF Core DbContext
 - Real repository implementations
@@ -745,7 +750,7 @@ Acceptance Criteria:
 ┌─────────────────────────────────────────────┐
 │   Bookify.Infrastructure (Infrastructure)    │
 │  EF Core DbContext | Repositories           │
-│  Keycloak Client | Redis Client             │
+│  Google OAuth Client | Redis Client         │
 │  Email Service | Quartz Scheduler           │
 └─────────────────────────────────────────────┘
 ```
@@ -785,35 +790,29 @@ Request → API Controller
 1. Registration Request
    ├─ POST /api/v1/users/register
    ├─ RegisterUserCommand → Handler
-   ├─ AuthenticationService.Register()
-   ├─ Keycloak Admin API call (client credentials)
-   ├─ User created in Keycloak realm
-   ├─ Identity ID returned
+  ├─ AuthenticationService.Register()
+  ├─ Google OAuth consent/sign-in flow
+  ├─ Google subject ID returned
+  ├─ Identity ID returned
    └─ User persisted in PostgreSQL
 
 2. Login Flow
    ├─ POST /api/v1/users/login
    ├─ LoginCommand → Handler
-   ├─ JwtService.GetToken()
-   ├─ Keycloak token endpoint request
-   ├─ JWT access token issued by Keycloak
+  ├─ JwtService.GetToken()
+  ├─ Google ID token validated locally
+  ├─ JWT access token issued by Bookify
    └─ Token returned to client
 
 3. Authenticated Request
-   ├─ Request with "Authorization: Bearer <JWT>"
-   ├─ JwtBearerMiddleware validates token
-   ├─ Keycloak public key validates signature
-   ├─ User identity populated in HttpContext
-   ├─ Authorization handler checks permissions
-   └─ Request proceeds if authorized
-
-4. Permission Check
-   ├─ [HasPermission(Permissions.BookingsCreate)]
-   ├─ PermissionAuthorizationHandler
-   ├─ Query user permissions from DB
-   ├─ Check against permission requirement
-   ├─ (Authorized) → Proceed
-   └─ (Denied) → 403 Forbidden
+  ├─ Request with "Authorization: Bearer <JWT>"
+  ├─ JwtBearerMiddleware validates token
+  ├─ Bookify public signing key validates signature
+  ├─ User identity populated in HttpContext
+  ├─ Layer 1 (Controller/pipeline): role-based attribute or simple policy (e.g. `[Authorize(Roles="Admin,Owner")]`) performs a fast, claims-only guard to fail-fast on obvious denies
+  ├─ Layer 2 (Application/service): command/query handlers call `IRbacService` / `GetEntityAccessMaskAsync(...)` to evaluate ownership, role→permission mappings, and business rules against the database; this enforces entity-level rights (read/create/update/delete)
+  ├─ (Authorized by Layer 2) → Proceed
+  └─ (Denied by Layer 2) → 403 Forbidden
 ```
 
 ### 6.4 Event Processing (Outbox Pattern)
@@ -859,7 +858,7 @@ CREATE TABLE users (
     first_name VARCHAR(200) NOT NULL,
     last_name VARCHAR(200) NOT NULL,
     email VARCHAR(400) NOT NULL UNIQUE,
-    identity_id TEXT NOT NULL,  -- Keycloak ID
+    identity_id TEXT NOT NULL,  -- Google subject ID
     created_on_utc TIMESTAMP NOT NULL,
     xmin INT8 NOT NULL          -- Optimistic concurrency
 );
@@ -991,10 +990,10 @@ CREATE TABLE user_roles (
 
 | Component | Technology | Rationale |
 |-----------|-----------|-----------|
-| **Identity Provider** | Keycloak | Open-source, OAuth 2.0/OIDC standard |
+| **Identity Provider** | Google OAuth 2.0 | External identity provider for sign-up/sign-in |
 | **Authentication** | JWT Bearer | Stateless, scalable |
 | **Authorization** | Custom handlers | Permission/role-based policies |
-| **Admin API** | Keycloak.NET Client | Programmatic realm management |
+| **Admin API** | None | User lifecycle handled locally after Google identity verification |
 
 ### 7.5 Infrastructure & DevOps
 
@@ -1016,7 +1015,7 @@ CREATE TABLE user_roles (
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|-----------|
 | **Double-booking Race Condition** | High | Critical | Database-level unique constraint on (apartment_id, date). Optimistic locking with `xmin`. |
-| **Keycloak Integration Failure** | Medium | High | Circuit breaker pattern. Fallback to cached user data. Health checks on startup. |
+| **Google OAuth Integration Failure** | Medium | High | Circuit breaker pattern. Fallback to cached user data. Health checks on startup. |
 | **Data Loss in Event Processing** | Low | Critical | Outbox pattern with database transactions. Idempotent handlers. Dead-letter queue for failures. |
 | **Performance Degradation** | Medium | High | Redis caching. Query optimization with Dapper. Load testing before production. Connection pooling. |
 | **Unauthorized Data Access** | Medium | Critical | Authorization handlers on every endpoint. Resource-based auth for user data. Audit logging. |
@@ -1040,7 +1039,7 @@ CREATE TABLE user_roles (
 
 | Service | Purpose | Protocol | Failover |
 |---------|---------|----------|----------|
-| **Keycloak** | Identity/Auth | OpenID Connect | Circuit breaker, cached tokens |
+| **Google OAuth 2.0** | Identity/Auth | OpenID Connect | Token validation, cached profile lookups |
 | **PostgreSQL** | Transactions | PostgreSQL Protocol | Connection pooling, replicas |
 | **Redis** | Caching | Redis Protocol | Graceful degradation, fallback to DB |
 | **SMTP Server** | Email | SMTP/TLS | Queue async, retry policy |
@@ -1054,7 +1053,7 @@ Bookify.API
 ├─ → Bookify.Domain (entities, business logic)
 └─ → Bookify.Infrastructure
      ├─ → PostgreSQL (data persistence)
-     ├─ → Keycloak (authentication)
+    ├─ → Google OAuth / JWT validation (authentication)
      ├─ → Redis (caching)
      └─ → SMTP (email notifications)
 ```
@@ -1088,13 +1087,13 @@ Bookify.API
 - 2 Kubernetes nodes (2 vCPU, 4GB RAM each)
 - PostgreSQL managed service (or containerized)
 - Redis managed service (or containerized)
-- Keycloak instance
+- Google OAuth client credentials
 
 **Production Environment (Initial):**
 - 3 Kubernetes nodes (4 vCPU, 8GB RAM each)
 - PostgreSQL managed service with replication
 - Redis managed service with clustering
-- Keycloak in HA configuration
+- Google OAuth configured with redundant local token validation and fallback cache
 - Load balancer (LB)
 - Backup and disaster recovery
 
@@ -1106,7 +1105,7 @@ Bookify.API
 | GitHub Enterprise (if needed) | Paid | $231/user/month | Public repos free |
 | Azure DevOps (if on Azure) | Variable | Pay-as-you-go | Alternative to GitHub |
 | PostgreSQL | Open Source | Free | Community supported |
-| Keycloak | Open Source | Free | Community supported |
+| Google OAuth 2.0 | Managed service | Usage-based | No identity infrastructure to host |
 | Redis | Open Source | Free | Community supported, or managed services |
 | Docker Hub | Free/Paid | 5-25/month | Private registries |
 | New Relic / DataDog (monitoring) | Paid | 500-2000/month | Production monitoring required |
@@ -1122,7 +1121,7 @@ Week 1-2   │ Foundation & Setup
            ├─ [✓] Development environment
            ├─ [✓] Git + CI/CD pipeline basics
            ├─ [✓] Database schema
-           ├─ [✓] Keycloak realm
+           ├─ [✓] Google OAuth client
            └─ [✓] Docker Compose
 
 Week 3-4   │ User Authentication
@@ -1246,13 +1245,16 @@ Deployment (Week 12)
 
    # Run migrations
    dotnet ef database update
+  
+  # Seed access control data (roles/permissions)
+  psql "host=localhost port=5432 dbname=bookify user=bookify password=secure_password" -f docs/seed_access_control.sql
    ```
 
 2. **Verify Deployment:**
    - [ ] API running on http://localhost:5000
    - [ ] Swagger accessible at http://localhost:5000/swagger
    - [ ] PostgreSQL connected
-   - [ ] Keycloak running on http://localhost:8080
+  - [ ] Google OAuth credentials configured in environment variables
 
 3. **Create First User:**
    - Register via `/api/v1/users/register`
@@ -1291,7 +1293,7 @@ Bookify.Infrastructure/
 2. **Technology:**
    - Entity Framework Core documentation (microsoft.com)
    - MediatR GitHub wiki
-   - Keycloak Administration Guide
+  - Google Cloud OAuth documentation
 
 3. **Code Quality:**
    - Code Complete by Steve McConnell
@@ -1367,7 +1369,7 @@ GET    /health                              # Health check endpoint
 ✅ Quick-start guide for development team  
 
 **Estimated Effort:** 12 weeks with 7-person team  
-**Technology Stack:** .NET 8, PostgreSQL, Keycloak, Redis, Kubernetes  
+**Technology Stack:** .NET 8, PostgreSQL, Google OAuth 2.0, Redis, Kubernetes  
 **Production Readiness:** Complete after Phase 6  
 
 ---
