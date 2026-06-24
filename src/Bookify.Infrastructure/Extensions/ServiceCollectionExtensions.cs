@@ -12,6 +12,7 @@ using Bookify.Infrastructure.Services.Authentication;
 using Bookify.Infrastructure.Services.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Bookify.Domain.Entities.AccessControl;
 
 namespace Bookify.Infrastructure.Extensions;
 
@@ -112,7 +113,7 @@ public static class ServiceCollectionExtensions
         .ValidateOnStart();
 
         services.AddScoped<JwtTokenProvider>();
-        services.AddScoped<TokenBlacklistService>();
+        // services.AddScoped<TokenBlacklistService>();
         return services;
     }
 
@@ -232,6 +233,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAuthorizationServices(
         this IServiceCollection services)
     {
+        // Register repositories for access control
+        services.AddScoped<IUserRoleRepository, Bookify.Infrastructure.Repositories.UserRoleRepository>();
+        services.AddScoped<IPermissionRepository, Bookify.Infrastructure.Repositories.PermissionRepository>();
+        services.AddScoped<IRoleRepository, Bookify.Infrastructure.Repositories.RoleRepository>();
+
         // Register RbacService for role/permission checking in service layer
         services.AddScoped<IRbacService, RbacService>();
 
