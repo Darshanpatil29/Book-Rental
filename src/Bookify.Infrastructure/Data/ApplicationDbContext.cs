@@ -93,7 +93,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     }
 
     /// <summary>
-    /// Saves all changes to the database, updating audit fields automatically.
+    /// Saves all changes to the database,  updating audit fields automatically.
     /// </summary>
     public override int SaveChanges()
     {

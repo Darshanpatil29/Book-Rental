@@ -1,7 +1,7 @@
 # BOOKIFY AI AGENT & MCP SERVER IMPLEMENTATION PLAN
 
-**Project Type:** AI Agent Integration with Semantic Kernel & MCP Server  
-**Technology Stack:** Semantic Kernel, Model Context Protocol (MCP), LLM APIs (OpenAI/Azure), .NET 10  
+**Project Type:** AI Agent Integration with Microsoft Agentic Framework & MCP Server  
+**Technology Stack:** Microsoft Agentic Framework, Model Context Protocol (MCP), LLM APIs (OpenAI/Azure), .NET 10  
 **Architecture:** Agent-based with MCP Server for tool management  
 **Date:** May 17, 2026
 
@@ -9,7 +9,7 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-This document outlines the integration of **AI Agent capabilities** into the Bookify platform using **Semantic Kernel (SK)** and **Model Context Protocol (MCP) Server**. The AI agent will enhance user experience by providing intelligent features such as:
+This document outlines the integration of **AI Agent capabilities** into the Bookify platform using **Microsoft Agentic Framework** and **Model Context Protocol (MCP) Server**. The AI agent will enhance user experience by providing intelligent features such as:
 
 - **Smart Apartment Recommendations** based on user preferences and history
 - **Natural Language Search** (e.g., "Find me a cozy apartment near the beach with WiFi")
@@ -20,7 +20,7 @@ This document outlines the integration of **AI Agent capabilities** into the Boo
 - **Price Optimization** (dynamic pricing suggestions for owners)
 
 **Key Components:**
-- ✅ Semantic Kernel integration for LLM interaction
+- ✅ Microsoft Agentic Framework integration for LLM interaction
 - ✅ MCP Server for standardized tool access
 - ✅ Custom tools for Bookify business operations
 - ✅ Agent orchestration for multi-step workflows
@@ -48,12 +48,12 @@ This document outlines the integration of **AI Agent capabilities** into the Boo
 ┌──────────────────────────────────────────────────────────────┐
 │          AI Agent Orchestration Layer (New)                   │
 │  ┌────────────────────────────────────────────────────────┐  │
-│  │ Semantic Kernel                                        │  │
-│  │ ├─ Kernel (core orchestrator)                          │  │
-│  │ ├─ Plugins (SK plugins system)                         │  │
+│  │ Microsoft Agentic Framework                            │  │
+│  │ ├─ Agent runtime (core orchestrator)                   │  │
+│  │ ├─ Plugins / tools                                     │  │
 │  │ ├─ Memory (short-term & long-term)                     │  │
 │  │ ├─ Functions (native & semantic)                       │  │
-│  │ └─ Connectors (LLM endpoints)                          │  │
+│  │ └─ Model connectors (LLM endpoints)                    │  │
 │  └────────────────────────────────────────────────────────┘  │
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │ MCP Server                                             │  │
@@ -92,13 +92,13 @@ This document outlines the integration of **AI Agent capabilities** into the Boo
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 Semantic Kernel Integration Flow
+### 2.2 Agentic Framework Integration Flow
 
 ```
 User Input (Natural Language)
     ↓
 ┌─────────────────────────────────────┐
-│  Semantic Kernel Kernel Instance    │
+│  Microsoft Agentic Framework Runtime │
 │  ├─ Parse user intent               │
 │  └─ Route to appropriate agent      │
 └────────────┬────────────────────────┘
@@ -176,24 +176,22 @@ Response to User
 
 ---
 
-## 3. SEMANTIC KERNEL IMPLEMENTATION
+## 3. MICROSOFT AGENTIC FRAMEWORK IMPLEMENTATION
 
 ### 3.1 Core Components
 
-#### 3.1.1 Kernel Configuration
+#### 3.1.1 Agentic Runtime Configuration
 
 ```csharp
-// File: Bookify.AI/Configuration/SemanticKernelConfiguration.cs
+// File: Bookify.AI/Configuration/AgenticFrameworkConfiguration.cs
 
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Embeddings;
+// Microsoft Agentic Framework runtime imports (SDK-specific namespaces to be finalized)
 using Bookify.AI.Plugins;
 using Bookify.AI.Memory;
 
-public static class SemanticKernelConfiguration
+public static class AgenticFrameworkConfiguration
 {
-    public static IServiceCollection AddSemanticKernelServices(
+    public static IServiceCollection AddAgenticFrameworkServices(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -201,41 +199,41 @@ public static class SemanticKernelConfiguration
         var openAiModelId = configuration["OpenAI:ModelId"] ?? "gpt-4-turbo";
         var openAiEmbeddingModel = configuration["OpenAI:EmbeddingModel"] ?? "text-embedding-3-small";
 
-        // Add Semantic Kernel
-        var kernelBuilder = Kernel.CreateBuilder();
+        // Add Microsoft Agentic Framework runtime
+        var agentBuilder = AgentRuntime.CreateBuilder();
 
         // Configure LLM connector (OpenAI)
-        kernelBuilder.AddOpenAIChatCompletion(
+        agentBuilder.AddOpenAIChatCompletion(
             modelId: openAiModelId,
             apiKey: openAiApiKey,
             httpClient: new HttpClient());
 
         // Add memory/embeddings
-        kernelBuilder.AddOpenAITextEmbeddingGeneration(
+        agentBuilder.AddOpenAITextEmbeddingGeneration(
             modelId: openAiEmbeddingModel,
             apiKey: openAiApiKey,
             httpClient: new HttpClient());
 
-        var kernel = kernelBuilder.Build();
+        var agentRuntime = agentBuilder.Build();
 
         // Register plugins
-        kernel.Plugins.AddFromType<ApartmentPlugin>("apartment");
-        kernel.Plugins.AddFromType<BookingPlugin>("booking");
-        kernel.Plugins.AddFromType<ReviewPlugin>("review");
-        kernel.Plugins.AddFromType<UserPlugin>("user");
-        kernel.Plugins.AddFromType<PricingPlugin>("pricing");
+        agentRuntime.Plugins.AddFromType<ApartmentPlugin>("apartment");
+        agentRuntime.Plugins.AddFromType<BookingPlugin>("booking");
+        agentRuntime.Plugins.AddFromType<ReviewPlugin>("review");
+        agentRuntime.Plugins.AddFromType<UserPlugin>("user");
+        agentRuntime.Plugins.AddFromType<PricingPlugin>("pricing");
 
         // Register memory
-        services.AddSingleton<ISemanticTextMemory>(serviceProvider =>
+        services.AddSingleton<IAgentTextMemory>(serviceProvider =>
         {
-            var embeddings = serviceProvider.GetRequiredService<ITextEmbeddingGenerationService>();
-            return new SemanticTextMemory(
-                new VolatileMemoryStore(),
+            var embeddings = serviceProvider.GetRequiredService<IAgentTextEmbeddingService>();
+            return new AgentTextMemory(
+                new AgentMemoryStore(),
                 embeddings);
         });
 
-        // Register kernel
-        services.AddSingleton(kernel);
+        // Register agent runtime
+        services.AddSingleton(agentRuntime);
 
         // Register agent service
         services.AddScoped<IAIAgentService, AIAgentService>();
@@ -246,12 +244,12 @@ public static class SemanticKernelConfiguration
 }
 ```
 
-#### 3.1.2 Kernel Plugin System
+#### 3.1.2 Agent Tool Modules
 
 ```csharp
 // File: Bookify.AI/Plugins/ApartmentPlugin.cs
 
-using Microsoft.SemanticKernel;
+// Microsoft Agentic Framework runtime imports (SDK-specific namespaces to be finalized)
 using System.ComponentModel;
 using Bookify.Application.Apartments.Queries;
 using MediatR;
@@ -268,7 +266,7 @@ public class ApartmentPlugin
         _logger = logger;
     }
 
-    [KernelFunction("search_apartments")]
+    [AgentFunction("search_apartments")]
     [Description("Search for available apartments based on criteria")]
     public async Task<string> SearchApartments(
         [Description("Check-in date (YYYY-MM-DD)")] string startDate,
@@ -304,7 +302,7 @@ public class ApartmentPlugin
         }
     }
 
-    [KernelFunction("get_apartment_details")]
+    [AgentFunction("get_apartment_details")]
     [Description("Get detailed information about a specific apartment")]
     public async Task<string> GetApartmentDetails(
         [Description("Apartment ID (GUID)")] string apartmentId)
@@ -325,7 +323,7 @@ public class ApartmentPlugin
         }
     }
 
-    [KernelFunction("recommend_apartments")]
+    [AgentFunction("recommend_apartments")]
     [Description("Get personalized apartment recommendations based on user preferences")]
     public async Task<string> RecommendApartments(
         [Description("User ID")] string userId,
@@ -360,7 +358,7 @@ public class ApartmentPlugin
 ```csharp
 // File: Bookify.AI/Plugins/BookingPlugin.cs
 
-using Microsoft.SemanticKernel;
+// Microsoft Agentic Framework runtime imports (SDK-specific namespaces to be finalized)
 using System.ComponentModel;
 using Bookify.Application.Bookings.Commands;
 using MediatR;
@@ -376,7 +374,7 @@ public class BookingPlugin
         _logger = logger;
     }
 
-    [KernelFunction("reserve_apartment")]
+    [AgentFunction("reserve_apartment")]
     [Description("Reserve an apartment for specified dates")]
     public async Task<string> ReserveApartment(
         [Description("Apartment ID")] string apartmentId,
@@ -405,7 +403,7 @@ public class BookingPlugin
         }
     }
 
-    [KernelFunction("confirm_booking")]
+    [AgentFunction("confirm_booking")]
     [Description("Confirm a reserved booking")]
     public async Task<string> ConfirmBooking(
         [Description("Booking ID")] string bookingId)
@@ -426,7 +424,7 @@ public class BookingPlugin
         }
     }
 
-    [KernelFunction("get_user_bookings")]
+    [AgentFunction("get_user_bookings")]
     [Description("Get all bookings for a user")]
     public async Task<string> GetUserBookings(
         [Description("User ID")] string userId,
@@ -456,12 +454,12 @@ public class BookingPlugin
 #### 3.1.4 Memory Management
 
 ```csharp
-// File: Bookify.AI/Memory/SemanticMemoryManager.cs
+// File: Bookify.AI/Memory/AgentMemoryManager.cs
 
-using Microsoft.SemanticKernel.Memory;
+// Microsoft Agentic Framework memory abstractions (SDK-specific namespaces to be finalized)
 using Bookify.Domain.Entities.Users;
 
-public interface ISemanticMemoryManager
+public interface IAgentMemoryManager
 {
     Task StoreUserPreferencesAsync(User user, string preferences);
     Task<string?> RetrieveUserPreferencesAsync(Guid userId);
@@ -471,14 +469,14 @@ public interface ISemanticMemoryManager
     Task<string?> GetConversationContextAsync(string sessionId);
 }
 
-public class SemanticMemoryManager : ISemanticMemoryManager
+public class AgentMemoryManager : IAgentMemoryManager
 {
-    private readonly ISemanticTextMemory _memory;
+    private readonly IAgentTextMemory _memory;
     private const string UserPreferencesCollection = "user_preferences";
     private const string BookingHistoryCollection = "booking_history";
     private const string ConversationCollection = "conversations";
 
-    public SemanticMemoryManager(ISemanticTextMemory memory)
+    public AgentMemoryManager(IAgentTextMemory memory)
     {
         _memory = memory;
     }
@@ -1023,9 +1021,7 @@ public class JsonSchema
 ```csharp
 // File: Bookify.AI/Services/AIAgentService.cs
 
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Agents;
-using Microsoft.SemanticKernel.ChatCompletion;
+// Microsoft Agentic Framework runtime imports (SDK-specific namespaces to be finalized)
 using Bookify.AI.Memory;
 
 public interface IAIAgentService
@@ -1037,20 +1033,20 @@ public interface IAIAgentService
 
 public class AIAgentService : IAIAgentService
 {
-    private readonly Kernel _kernel;
-    private readonly ISemanticMemoryManager _memoryManager;
+    private readonly IAgentRuntime _agentRuntime;
+    private readonly IAgentMemoryManager _memoryManager;
     private readonly IMCPServerService _mcpServerService;
     private readonly ILogger<AIAgentService> _logger;
     private readonly IConfiguration _configuration;
 
     public AIAgentService(
-        Kernel kernel,
-        ISemanticMemoryManager memoryManager,
+        IAgentRuntime agentRuntime,
+        IAgentMemoryManager memoryManager,
         IMCPServerService mcpServerService,
         ILogger<AIAgentService> logger,
         IConfiguration configuration)
     {
-        _kernel = kernel;
+        _agentRuntime = agentRuntime;
         _memoryManager = memoryManager;
         _mcpServerService = mcpServerService;
         _logger = logger;
@@ -1068,7 +1064,7 @@ public class AIAgentService : IAIAgentService
             var bookingHistory = await _memoryManager.RetrieveBookingHistoryAsync(Guid.Parse(userId));
 
             // 2. Build context for the agent
-            var context = new KernelArguments
+            var context = new AgentArguments
             {
                 ["userId"] = userId,
                 ["userQuery"] = userQuery,
@@ -1077,7 +1073,7 @@ public class AIAgentService : IAIAgentService
             };
 
             // 3. Invoke agent
-            var chatCompletion = _kernel.GetRequiredService<IChatCompletionService>();
+            var chatCompletion = _agentRuntime.GetChatCompletionService();
             var history = new ChatHistory();
             
             history.AddSystemMessage($@"
@@ -1122,10 +1118,10 @@ Always be helpful, accurate, and confirm important details before taking action.
             var guidUserId = Guid.Parse(userId);
             
             // Call recommendation plugin
-            var result = await _kernel.InvokeAsync(
+            var result = await _agentRuntime.InvokeAsync(
                 "apartment",
                 "recommend_apartments",
-                new KernelArguments
+                new AgentArguments
                 {
                     ["userId"] = userId
                 });
@@ -1149,10 +1145,10 @@ Always be helpful, accurate, and confirm important details before taking action.
             var endDate = parts[1];
 
             // Step 1: Get apartment details
-            var apartmentDetails = await _kernel.InvokeAsync(
+            var apartmentDetails = await _agentRuntime.InvokeAsync(
                 "apartment",
                 "get_apartment_details",
-                new KernelArguments { ["apartmentId"] = apartmentId });
+                new AgentArguments { ["apartmentId"] = apartmentId });
 
             // Step 2: Get apartment reviews
             // Step 3: Display pricing
@@ -1347,23 +1343,23 @@ public class BookingAssistRequest
 ### Phase 1: Foundation (Weeks 1-2)
 
 **Deliverables:**
-- ✅ Semantic Kernel integration
+- ✅ Microsoft Agentic Framework integration
 - ✅ Basic plugin system setup
 - ✅ MCP Server framework
 - ✅ Memory management implementation
-- ✅ Docker container for SK
+- ✅ Docker container for agent runtime
 - ✅ Unit tests for core components
 
 **Activities:**
 1. Create `Bookify.AI` project structure
-2. Install Semantic Kernel NuGet packages
+2. Install Microsoft Agentic Framework NuGet packages
 3. Configure OpenAI/Azure integration
 4. Implement core plugins (Apartment, Booking)
 5. Setup MCP Server
 6. Integration tests
 
 **Success Criteria:**
-- SK kernel initializes successfully
+- Agent runtime initializes successfully
 - Plugins load without errors
 - MCP server responds to requests
 - Memory operations functional
@@ -1497,10 +1493,10 @@ ENABLE_BOOKING_ASSIST=true
 <!-- Add to Bookify.AI.csproj -->
 
 <ItemGroup>
-    <!-- Semantic Kernel -->
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.15.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.15.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" Version="1.15.0" />
+    <!-- Microsoft Agentic Framework packages (SDK names to be confirmed) -->
+    <PackageReference Include="<Microsoft.AgenticFramework.Runtime.Package>" Version="<version>" />
+    <PackageReference Include="<Microsoft.AgenticFramework.OpenAIConnector.Package>" Version="<version>" />
+    <PackageReference Include="<Microsoft.AgenticFramework.Memory.Package>" Version="<version>" />
     
     <!-- Logging -->
     <PackageReference Include="Serilog" Version="3.1.1" />
@@ -1643,7 +1639,7 @@ public class AIAgentMetrics
 
 | Component | Service | Est. Cost |
 |-----------|---------|-----------|
-| **Semantic Kernel** | In-process | $0 |
+| **Microsoft Agentic Framework** | In-process | $0 |
 | **MCP Server** | Container | $50-100/month |
 | **Memory Store** | Redis | $20-50/month |
 | **Logging** | Serilog/Seq | $50-100/month |
@@ -1693,7 +1689,7 @@ public class AIAgentMetrics
 | Issue | Cause | Solution |
 |-------|-------|----------|
 | **MCP Server not responding** | Port conflict | Check port availability: `netstat -ano \| findstr :9090` |
-| **Semantic Kernel initialization fails** | Missing API key | Verify OpenAI API key in configuration |
+| **Agentic framework initialization fails** | Missing API key | Verify OpenAI API key in configuration |
 | **Tool execution timeout** | Slow database query | Optimize CQRS handlers, add caching |
 | **Memory overflow** | Too many stored contexts | Implement cleanup job, set TTL |
 | **Rate limiting triggered** | Excessive requests | Implement request batching |
@@ -1708,11 +1704,11 @@ dotnet new classlib -n Bookify.AI -f net10.0
 
 # 2. Install dependencies
 cd Bookify.AI
-dotnet add package Microsoft.SemanticKernel
-dotnet add package Microsoft.SemanticKernel.Connectors.OpenAI
+dotnet add package <Microsoft.AgenticFramework.Runtime.Package>
+dotnet add package <Microsoft.AgenticFramework.OpenAIConnector.Package>
 
 # 3. Configure in Program.cs
-builder.Services.AddSemanticKernelServices(builder.Configuration);
+builder.Services.AddAgenticFrameworkServices(builder.Configuration);
 
 # 4. Add controller
 dotnet add package Microsoft.AspNetCore.Mvc
@@ -1727,7 +1723,7 @@ dotnet run
 
 ## 15. REFERENCES & RESOURCES
 
-- **Semantic Kernel Documentation**: https://learn.microsoft.com/en-us/semantic-kernel/
+- **Microsoft Agentic Framework Documentation**: <to be confirmed>
 - **MCP Specification**: https://modelcontextprotocol.io/
 - **OpenAI API**: https://platform.openai.com/docs/
 - **Azure OpenAI**: https://learn.microsoft.com/en-us/azure/ai-services/openai/

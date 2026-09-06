@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Serilog;
 using Bookify.Infrastructure;
 using Bookify.Infrastructure.Configuration;
@@ -13,7 +14,11 @@ builder.Host.UseSerilog((context, config) =>
 );
 
 // Services
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {

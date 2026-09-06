@@ -8,6 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 using System.Text;
 using Bookify.Infrastructure.Configuration;
 using Bookify.Infrastructure.Data;
+using Bookify.Infrastructure.Services.Crud;
 using Bookify.Infrastructure.Services.Authentication;
 using Bookify.Infrastructure.Services.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -240,6 +241,15 @@ public static class ServiceCollectionExtensions
 
         // Register RbacService for role/permission checking in service layer
         services.AddScoped<IRbacService, RbacService>();
+        services.AddScoped<ICrudTestService, CrudTestService>();
+        services.AddScoped<IUserService, UsersService>();
+        services.AddScoped<IApartmentService, ApartmentsService>();
+        services.AddScoped<IBookingService, BookingsService>();
+        services.AddScoped<IReviewService, ReviewsService>();
+        services.AddScoped<IRoleService, RolesService>();
+        services.AddScoped<IPermissionService, PermissionsService>();
+        services.AddScoped<IUserRoleService, UserRolesService>();
+        services.AddScoped<IRolePermissionService, RolePermissionsService>();
 
         return services;
     }
